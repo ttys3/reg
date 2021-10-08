@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/coreos/clair/api/v3/clairpb"
+	"github.com/quay/clair/v3/api/v3/clairpb"
 	"github.com/genuinetools/reg/registry"
 )
 

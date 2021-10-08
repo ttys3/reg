@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/coreos/clair/api/v3/clairpb"
+	"github.com/quay/clair/v3/api/v3/clairpb"
 	"github.com/docker/distribution"
 	"github.com/genuinetools/reg/registry"
 )

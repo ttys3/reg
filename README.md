@@ -209,7 +209,7 @@ High: 1
 with a list of registry images and serves it to the web.
 
 It will run vulnerability scanning if you
-have a [CoreOS Clair](https://github.com/coreos/clair) server set up
+have a [CoreOS Clair](https://github.com/quay/clair) server set up
 and pass the url with the `--clair` flag.
 
 It is possible to run `reg server` just as a one time static generator.
