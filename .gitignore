@@ -53,5 +53,6 @@ profile.out
 
 testreg
 .certs
-server/static/index.html
-server/static/repo/
+/server/static/index.html
+/server/static/repo/
+/static

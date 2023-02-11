@@ -271,7 +271,25 @@ the CA certificate directory (as root):
 $ cp cacert.pem /usr/share/ca-certificates
 ```
 
-## clair api
+## dev docs
+
+### registry api
+
+Announcing Docker Hub OCI Artifacts Support https://www.docker.com/blog/announcing-docker-hub-oci-artifacts-support/
+
+https://github.com/opencontainers/distribution-spec/blob/main/spec.md#api
+
+https://docs.docker.com/registry/spec/manifest-v2-2/
+
+https://docs.docker.com/registry/spec/manifest-v2-1/
+
+https://github.com/distribution/distribution
+
+https://docs.docker.com/registry/introduction/
+
+https://docs.docker.com/registry/deploying/
+
+### clair api
 
 v2 https://pkg.go.dev/github.com/quay/clair@v2.1.0+incompatible/api/v1
 

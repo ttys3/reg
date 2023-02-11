@@ -2,9 +2,11 @@ package main
 
 import (
 	"context"
+	"embed"
 	"flag"
 	"fmt"
 	"html/template"
+	"io/fs"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -12,15 +14,17 @@ import (
 	"time"
 
 	"github.com/genuinetools/reg/clair"
-	"github.com/genuinetools/reg/internal/binutils/static"
-	"github.com/genuinetools/reg/internal/binutils/templates"
-	"github.com/gorilla/mux"
+	"github.com/labstack/echo/v4"
 	wordwrap "github.com/mitchellh/go-wordwrap"
-	"github.com/shurcooL/httpfs/html/vfstemplate"
 	"github.com/sirupsen/logrus"
 )
 
 const serverHelp = `Run a static UI server for a registry.`
+
+var (
+	//go:embed server
+	assets embed.FS
+)
 
 func (cmd *serverCommand) Name() string      { return "server" }
 func (cmd *serverCommand) Args() string      { return "[OPTIONS]" }
@@ -57,6 +61,23 @@ type serverCommand struct {
 	listenAddress string
 	port          string
 	assetPath     string
+}
+
+func traverseDirFunc(subFs embed.FS, dir string, results *[]string) {
+	if files, err := subFs.ReadDir(dir); err == nil {
+		for _, f := range files {
+			if f.Name() == "." || f.Name() == ".." {
+				continue
+			}
+			if !f.IsDir() {
+				*results = append(*results, filepath.Join(dir, f.Name()))
+			} else {
+				traverseDirFunc(subFs, filepath.Join(dir, f.Name()), results)
+			}
+		}
+	} else {
+		logrus.Error(err)
+	}
 }
 
 func (cmd *serverCommand) Run(ctx context.Context, args []string) error {
@@ -96,6 +117,18 @@ func (cmd *serverCommand) Run(ctx context.Context, args []string) error {
 
 	staticDir := filepath.Join(assetDir, "static")
 
+	if debug {
+		logrus.Info("beginning to traverse assets")
+		logrus.Info("--------------------------------------")
+		results := []string{}
+
+		traverseDirFunc(assets, ".", &results)
+		for _, f := range results {
+			logrus.Infof("file: %s", f)
+		}
+		logrus.Info("--------------------------------------")
+	}
+
 	funcMap := template.FuncMap{
 		"trim": func(s string) string {
 			return wordwrap.WrapString(s, 80)
@@ -123,7 +156,10 @@ func (cmd *serverCommand) Run(ctx context.Context, args []string) error {
 	}
 
 	rc.tmpl = template.New("").Funcs(funcMap)
-	rc.tmpl = template.Must(vfstemplate.ParseGlob(templates.Assets, rc.tmpl, "*.html"))
+	rc.tmpl, err = rc.tmpl.ParseFS(assets, "server/templates/*.html")
+	if err != nil {
+		return fmt.Errorf("parsing templates failed: %v", err)
+	}
 
 	// Create the initial index.
 	logrus.Info("creating initial static index")
@@ -148,38 +184,49 @@ func (cmd *serverCommand) Run(ctx context.Context, args []string) error {
 		}
 	}()
 
-	// Create mux server.
-	mux := mux.NewRouter()
-	mux.UseEncodedPath()
+	e := echo.New()
+	//// Create mux server.
+	//mux := mux.NewRouter()
+	// UseEncodedPath tells the router to match the encoded original path
+	// to the routes.
+	// For eg. "/path/foo%2Fbar/to" will match the path "/path/{var}/to".
+	//
+	// If not called, the router will match the unencoded path to the routes.
+	// For eg. "/path/foo%2Fbar/to" will match the path "/path/foo/bar/to"
+	//mux.UseEncodedPath()
 
 	// Static files handler.
-	mux.HandleFunc("/repo/{repo}/tags", rc.tagsHandler)
-	mux.HandleFunc("/repo/{repo}/tags/", rc.tagsHandler)
-	mux.HandleFunc("/repo/{repo}/tag/{tag}", rc.vulnerabilitiesHandler)
-	mux.HandleFunc("/repo/{repo}/tag/{tag}/", rc.vulnerabilitiesHandler)
+	e.GET("/repo/:repo/tags", rc.tagsHandler)
+	e.GET("/repo/:repo/tags/", rc.tagsHandler)
+	e.GET("/repo/:repo/tag/:tag", rc.vulnerabilitiesHandler)
+	e.GET("/repo/:repo/tag/:tag/", rc.vulnerabilitiesHandler)
 
 	// Add the vulns endpoints if we have a client for a clair server.
 	if rc.cl != nil {
 		logrus.Infof("adding clair handlers...")
-		mux.HandleFunc("/repo/{repo}/tag/{tag}/vulns", rc.vulnerabilitiesHandler)
-		mux.HandleFunc("/repo/{repo}/tag/{tag}/vulns/", rc.vulnerabilitiesHandler)
-		mux.HandleFunc("/repo/{repo}/tag/{tag}/vulns.json", rc.vulnerabilitiesHandler)
+		e.GET("/repo/:repo/tag/:tag/vulns", rc.vulnerabilitiesHandler)
+		e.GET("/repo/:repo/tag/:tag/vulns/", rc.vulnerabilitiesHandler)
+		e.GET("/repo/:repo/tag/:tag/vulns.json", rc.vulnerabilitiesHandler)
 	}
 
+	// while request uri path is: /static/css/styles.css
+	// the file path in embed FS is: server/static/css/styles.css
+	// we need a Sub FS to strip the path prefix (here it is "server") when Open the file
+	assetSubFS, _ := fs.Sub(assets, "server")
 	// Serve the static assets.
-	staticAssetsHandler := http.FileServer(static.Assets)
-	mux.PathPrefix("/static/").Handler(http.StripPrefix("/static/", staticAssetsHandler))
+	staticAssetsHandler := http.FileServer(http.FS(assetSubFS))
+	e.GET("/static/*", echo.WrapHandler(staticAssetsHandler))
+
+	//e.GET("/static/*", echo.WrapHandler(http.StripPrefix("/static/", staticAssetsHandler)))
+
 	staticHandler := http.FileServer(http.Dir(staticDir))
-	mux.Handle("/", staticHandler)
+
+	e.GET("/", echo.WrapHandler(staticHandler))
 
 	// Set up the server.
-	server := &http.Server{
-		Addr:    cmd.listenAddress + ":" + cmd.port,
-		Handler: mux,
-	}
 	logrus.Infof("Starting server on port %q", cmd.port)
 	if len(cmd.cert) > 0 && len(cmd.key) > 0 {
-		return server.ListenAndServeTLS(cmd.cert, cmd.key)
+		return e.StartTLS(cmd.listenAddress+":"+cmd.port, cmd.cert, cmd.key)
 	}
-	return server.ListenAndServe()
+	return e.Start(cmd.listenAddress + ":" + cmd.port)
 }

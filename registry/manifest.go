@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/docker/distribution"
+	"github.com/docker/distribution/manifest/ocischema"
 	"io/ioutil"
 	"net/http"
 
@@ -65,7 +66,28 @@ func (r *Registry) ManifestList(ctx context.Context, repository, ref string) (ma
 	return m, nil
 }
 
+// ManifestOCI gets the registry OCI manifest.
+// Warning: currently not supported by docker open source registry or docker hub.
+func (r *Registry) ManifestOCI(ctx context.Context, repository, ref string) (ocischema.Manifest, error) {
+	uri := r.url("/v2/%s/manifests/%s", repository, ref)
+	r.Logf("registry.manifests uri=%s repository=%s ref=%s", uri, repository, ref)
+
+	var m ocischema.Manifest
+	if _, err := r.getJSON(ctx, uri, &m); err != nil {
+		r.Logf("registry.manifests response=%v", m)
+		return m, err
+	}
+
+	if m.Versioned.SchemaVersion != ocischema.SchemaVersion.SchemaVersion {
+		return m, ErrUnexpectedSchemaVersion
+	}
+
+	return m, nil
+}
+
 // ManifestV2 gets the registry v2 manifest.
+// v2 means "Schema 2", Image Manifest Version 2, Schema 2
+// https://docs.docker.com/registry/spec/manifest-v2-2/
 func (r *Registry) ManifestV2(ctx context.Context, repository, ref string) (schema2.Manifest, error) {
 	uri := r.url("/v2/%s/manifests/%s", repository, ref)
 	r.Logf("registry.manifests uri=%s repository=%s ref=%s", uri, repository, ref)
@@ -76,7 +98,7 @@ func (r *Registry) ManifestV2(ctx context.Context, repository, ref string) (sche
 		return m, err
 	}
 
-	if m.Versioned.SchemaVersion != 2 {
+	if m.Versioned.SchemaVersion != schema2.SchemaVersion.SchemaVersion {
 		return m, ErrUnexpectedSchemaVersion
 	}
 
@@ -84,13 +106,16 @@ func (r *Registry) ManifestV2(ctx context.Context, repository, ref string) (sche
 }
 
 // ManifestV1 gets the registry v1 manifest.
+// v1 means "Schema 1", Image Manifest Version 2, Schema 1
+// https://docs.docker.com/registry/spec/manifest-v2-1/#manifest-field-descriptions
 func (r *Registry) ManifestV1(ctx context.Context, repository, ref string) (schema1.SignedManifest, error) {
 	uri := r.url("/v2/%s/manifests/%s", repository, ref)
 	r.Logf("registry.manifests uri=%s repository=%s ref=%s", uri, repository, ref)
 
 	var m schema1.SignedManifest
 	if _, err := r.getJSON(ctx, uri, &m); err != nil {
-		r.Logf("registry.manifests response=%v", m)
+		payload, _, _ := m.Payload()
+		r.Logf("registry.manifests v1 response, Manifest=%v Canonical=%s Payload=%s", m.Manifest, m.Canonical, payload)
 		return m, err
 	}
 

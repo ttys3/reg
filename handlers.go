@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"github.com/labstack/echo/v4"
 	"html/template"
 	"io/ioutil"
 	"net/http"
@@ -17,7 +19,6 @@ import (
 
 	"github.com/genuinetools/reg/clair"
 	"github.com/genuinetools/reg/registry"
-	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 )
 
@@ -140,20 +141,17 @@ func (rc *registryController) repositories(ctx context.Context, staticDir string
 	return nil
 }
 
-func (rc *registryController) tagsHandler(w http.ResponseWriter, r *http.Request) {
+func (rc *registryController) tagsHandler(c echo.Context) error {
 	logrus.WithFields(logrus.Fields{
 		"func":   "tags",
-		"URL":    r.URL,
-		"method": r.Method,
+		"URL":    c.Request().URL,
+		"method": c.Request().Method,
 	}).Info("fetching tags")
 
 	// Parse the query variables.
-	vars := mux.Vars(r)
-	repo, err := url.QueryUnescape(vars["repo"])
+	repo, err := url.QueryUnescape(c.Param("repo"))
 	if err != nil || repo == "" {
-		w.WriteHeader(http.StatusNotFound)
-		fmt.Fprint(w, "Empty repo")
-		return
+		return c.String(http.StatusNotFound, "Empty repo")
 	}
 
 	// Generate the tags template.
@@ -161,17 +159,15 @@ func (rc *registryController) tagsHandler(w http.ResponseWriter, r *http.Request
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"func":   "tags",
-			"URL":    r.URL,
-			"method": r.Method,
+			"URL":    c.Request().URL,
+			"method": c.Request().Method,
 		}).Errorf("getting tags for %s failed: %v", repo, err)
 
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "Getting tags for %s failed", repo)
-		return
+		return c.String(http.StatusInternalServerError, fmt.Sprintf("Getting tags for %s failed", repo))
 	}
 
 	// Write the template.
-	fmt.Fprint(w, string(b))
+	return c.HTML(http.StatusOK, string(b))
 }
 
 func (rc *registryController) generateTagsTemplate(ctx context.Context, repo string, hasVulns bool) ([]byte, error) {
@@ -197,8 +193,14 @@ func (rc *registryController) generateTagsTemplate(ctx context.Context, repo str
 
 	for _, tag := range tags {
 		// get the manifest
+		// docker V2 pull requests may return V1 manifests unexpectedly resulting in "missing signature key" error
 		m1, err := rc.reg.ManifestV1(ctx, repo, tag)
 		if err != nil {
+			// skip htp error
+			if errors.Is(err, registry.ErrResourceNotFound) {
+				logrus.Infof("skip not exists tag %s:%s", repo, tag)
+				continue
+			}
 			return nil, fmt.Errorf("getting v1 manifest for %s:%s failed: %v", repo, tag, err)
 		}
 
@@ -237,39 +239,33 @@ func (rc *registryController) generateTagsTemplate(ctx context.Context, repo str
 	return buf.Bytes(), nil
 }
 
-func (rc *registryController) vulnerabilitiesHandler(w http.ResponseWriter, r *http.Request) {
+func (rc *registryController) vulnerabilitiesHandler(c echo.Context) error {
 	logrus.WithFields(logrus.Fields{
 		"func":   "vulnerabilities",
-		"URL":    r.URL,
-		"method": r.Method,
+		"URL":    c.Request().URL,
+		"method": c.Request().Method,
 	}).Info("fetching vulnerabilities")
 
 	// Parse the query variables.
-	vars := mux.Vars(r)
-	repo, err := url.QueryUnescape(vars["repo"])
-	tag := vars["tag"]
+	repo, err := url.QueryUnescape(c.Param("repo"))
+	tag := c.Param("tag")
 
 	if err != nil || repo == "" {
-		w.WriteHeader(http.StatusNotFound)
-		fmt.Fprint(w, "Empty repo")
-		return
+		return c.String(http.StatusNotFound, "Empty repo")
 	}
 
 	if tag == "" {
-		w.WriteHeader(http.StatusNotFound)
-		fmt.Fprint(w, "Empty tag")
-		return
+		return c.String(http.StatusNotFound, "Empty tag")
 	}
 
 	image, err := registry.ParseImage(rc.reg.Domain + "/" + repo + ":" + tag)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"func":   "vulnerabilities",
-			"URL":    r.URL,
-			"method": r.Method,
+			"URL":    c.Request().URL,
+			"method": c.Request().Method,
 		}).Errorf("parsing image %s:%s failed: %v", repo, tag, err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+		return c.String(http.StatusInternalServerError, fmt.Sprintf("Parsing image %s:%s failed", repo, tag))
 	}
 
 	// Get the vulnerability report.
@@ -280,39 +276,25 @@ func (rc *registryController) vulnerabilitiesHandler(w http.ResponseWriter, r *h
 		if err != nil {
 			logrus.WithFields(logrus.Fields{
 				"func":   "vulnerabilities",
-				"URL":    r.URL,
-				"method": r.Method,
+				"URL":    c.Request().URL,
+				"method": c.Request().Method,
 			}).Errorf("vulnerability scanning for %s:%s failed: %v", repo, tag, err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
+			return c.String(http.StatusInternalServerError, fmt.Sprintf("Vulnerability scanning for %s:%s failed", repo, tag))
 		}
 	}
 
-	if strings.HasSuffix(r.URL.String(), ".json") {
-		js, err := json.Marshal(result)
-		if err != nil {
-			logrus.WithFields(logrus.Fields{
-				"func":   "vulnerabilities",
-				"URL":    r.URL,
-				"method": r.Method,
-			}).Errorf("json marshal failed: %v", err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(js)
-		return
+	if strings.HasSuffix(c.Request().URL.String(), ".json") {
+		return c.JSON(http.StatusOK, result)
 	}
 
 	// Execute the template.
-	if err := rc.tmpl.ExecuteTemplate(w, "vulns", result); err != nil {
+	if err := rc.tmpl.ExecuteTemplate(c.Response().Writer, "vulns", result); err != nil {
 		logrus.WithFields(logrus.Fields{
 			"func":   "vulnerabilities",
-			"URL":    r.URL,
-			"method": r.Method,
+			"URL":    c.Request().URL,
+			"method": c.Request().Method,
 		}).Errorf("template rendering failed: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+		return c.String(http.StatusInternalServerError, fmt.Sprintf("template rendering failed: %v", err))
 	}
+	return nil
 }

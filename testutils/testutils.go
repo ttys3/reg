@@ -58,7 +58,7 @@ func StartRegistry(dcli *client.Client, config, username, password string) (stri
 				Name: "always",
 			},
 		},
-		nil, "")
+		nil, nil, "")
 	if err != nil {
 		return "", "", err
 	}
@@ -113,7 +113,7 @@ func startClairDB(dcli *client.Client) (string, error) {
 				Name: "always",
 			},
 		},
-		nil, "")
+		nil, nil, "")
 	if err != nil {
 		return "", err
 	}
@@ -180,7 +180,7 @@ func StartClair(dcli *client.Client) (string, string, error) {
 				Name: "always",
 			},
 		},
-		nil, "")
+		nil, nil, "")
 	if err != nil {
 		return dbID, c.ID, err
 	}

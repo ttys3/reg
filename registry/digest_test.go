@@ -27,6 +27,7 @@ func TestDigestFromDockerHub(t *testing.T) {
 	if d == "" {
 		t.Error("Empty digest received")
 	}
+	t.Logf("digest: %s", d)
 }
 
 func TestDigestFromGCR(t *testing.T) {

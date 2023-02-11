@@ -4,7 +4,9 @@ import (
 	"context"
 	"crypto/tls"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"regexp"
@@ -15,6 +17,10 @@ import (
 	"github.com/distribution/distribution/v3/manifest/schema2"
 	"github.com/docker/docker/api/types"
 )
+
+var ErrResourceNotFound = errors.New("resource not found")
+var ErrBadRequest = errors.New("bad request")
+var ErrUnexpectedHttpStatusCode = errors.New("unexpected http status code")
 
 // Registry defines the client for retrieving information from the registry API.
 type Registry struct {
@@ -150,7 +156,16 @@ func (r *Registry) getJSON(ctx context.Context, url string, response interface{}
 	}
 
 	switch response.(type) {
+	//case *ocischema.Manifest:
+	//	req.Header.Add("Accept", imagespecv1.MediaTypeImageManifest)
 	case *schema2.Manifest:
+		// https://docs.docker.com/registry/spec/manifest-v2-2/#backward-compatibility
+		// When pulling images, clients indicate support for this new version of the manifest format
+		// by sending the `application/vnd.docker.distribution.manifest.v2+json` and
+		// `application/vnd.docker.distribution.manifest.list.v2+json` media types in an `Accept` header
+		// when making a request to the `manifests` endpoint. Updated clients should check
+		// the `Content-Type` header to see whether the manifest returned from the endpoint is in the old format,
+		// or is an image manifest or manifest list in the new format.
 		req.Header.Add("Accept", schema2.MediaTypeManifest)
 	case *manifestlist.ManifestList:
 		req.Header.Add("Accept", manifestlist.MediaTypeManifestList)
@@ -162,6 +177,23 @@ func (r *Registry) getJSON(ctx context.Context, url string, response interface{}
 	}
 	defer resp.Body.Close()
 	r.Logf("registry.registry resp.Status=%s", resp.Status)
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		var wrapErr error
+		switch resp.StatusCode {
+		case http.StatusBadRequest:
+			wrapErr = ErrBadRequest
+		case http.StatusNotFound:
+			wrapErr = ErrResourceNotFound
+		default:
+			wrapErr = ErrUnexpectedHttpStatusCode
+		}
+		if resp.StatusCode == http.StatusNotFound {
+			wrapErr = ErrResourceNotFound
+		}
+		return nil, fmt.Errorf("%v: %w, body=%s", resp.StatusCode, wrapErr, string(body))
+	}
 
 	if err := json.NewDecoder(resp.Body).Decode(response); err != nil {
 		return nil, err
