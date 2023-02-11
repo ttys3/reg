@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/distribution/distribution/v3/reference"
 	"github.com/docker/cli/cli/config"
 	clitypes "github.com/docker/cli/cli/config/types"
-	"github.com/docker/distribution/reference"
 	"github.com/docker/docker/api/types"
 	"github.com/sirupsen/logrus"
 )

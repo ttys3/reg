@@ -3,11 +3,11 @@ package clair
 import (
 	"context"
 	"fmt"
+	"github.com/genuinetools/reg/registry"
 	"strings"
 
+	"github.com/distribution/distribution/v3"
 	"github.com/quay/clair/v3/api/v3/clairpb"
-	"github.com/docker/distribution"
-	"github.com/genuinetools/reg/registry"
 )
 
 // NewClairLayer will form a layer struct required for a clair scan.

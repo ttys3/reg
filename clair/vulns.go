@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/quay/clair/v3/api/v3/clairpb"
 	"github.com/genuinetools/reg/registry"
+	"github.com/quay/clair/v3/api/v3/clairpb"
 )
 
 // Vulnerabilities scans the given repo and tag.
