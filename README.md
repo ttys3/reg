@@ -271,6 +271,14 @@ the CA certificate directory (as root):
 $ cp cacert.pem /usr/share/ca-certificates
 ```
 
+## clair api
+
+v2 https://pkg.go.dev/github.com/quay/clair@v2.1.0+incompatible/api/v1
+
+v3 https://pkg.go.dev/github.com/quay/clair/v3@v3.0.0-pre1/api/v3/clairpb
+
+v4 https://pkg.go.dev/github.com/quay/clair/v4@v4.6.0/httptransport/client
+
 ## Contributing
 
 If you plan on contributing you should be able to run the tests locally. The
