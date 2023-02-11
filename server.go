@@ -42,7 +42,7 @@ func (cmd *serverCommand) Register(fs *flag.FlagSet) {
 
 	fs.StringVar(&cmd.cert, "cert", "", "path to ssl cert")
 	fs.StringVar(&cmd.key, "key", "", "path to ssl key")
-	fs.StringVar(&cmd.listenAddress, "listen-address", "", "address to listen on")
+	fs.StringVar(&cmd.listenAddress, "addr", "", "address to listen on")
 	fs.StringVar(&cmd.port, "port", "8080", "port for server to run on")
 	fs.StringVar(&cmd.assetPath, "asset-path", "", "Path to assets and templates")
 
