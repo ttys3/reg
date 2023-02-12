@@ -2,6 +2,7 @@ package registry
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/distribution/distribution/v3/reference"
 	digest "github.com/opencontainers/go-digest"
@@ -14,6 +15,15 @@ type Image struct {
 	Tag    string
 	Digest digest.Digest
 	named  reference.Named
+}
+
+type Layer struct {
+	Index       int64 // start from 1
+	Digest      digest.Digest
+	Size        int64
+	Command     string
+	CommandLang string
+	Created     *time.Time
 }
 
 // String returns the string representation of an image.

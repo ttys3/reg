@@ -1,0 +1,109 @@
+{{define "layer"}}
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<head>
+    <meta charset="utf-8">
+    <base href="/" >
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>{{ .Image.Domain }}/{{ .Image.Path }}:{{ .Image.Tag }}</title>
+    <link rel="icon" type="image/ico" href="/static/favicon.ico">
+    <link rel="stylesheet" href="/static/css/styles.css" />
+    <link href="/static/js/lib/prism.css" rel="stylesheet" />
+</head>
+<body>
+<h1><a href="/">🏠</a> / <a href="/repo/{{ .Image.Path | urlquery }}/tags">{{ .Image.Path }}</a> / {{ .Image.Path }}:{{ .Image.Tag }}</h1>
+
+    <div>
+
+    <div class="wrapper layer-wrapper">
+
+        <div class="column">
+            <h2>IMAGE LAYERS</h2>
+            <table>
+                <tr>
+                    <th>Layer</th>
+                    <th style="width: 400px">Command</th>
+                    <td style="width: 80px">Size</td>
+                </tr>
+                {{ range $idx, $layer := .Layers }}
+                <tr>
+                    <td>{{ $layer.Index }} </td>
+                    <td>
+                        <div style="display:inline-flex;">
+                            <code class="layer-command-short" data-command-lang="{{ $layer.CommandLang }}">{{ $layer.Command }}</code>
+                        </div>
+                    </td>
+                    <td>{{ $layer.Size | humanize_bytes }} </td>
+                </tr>
+                {{ end }}
+            </table>
+        </div>
+
+
+        <div class="command-detail-wrap column">
+            <h2>Command</h2>
+            <div class="command-detail">
+               <pre><code class="language-bash" id="command-detail-cmd"></code></pre>
+            </div>
+        </div>
+
+    </div>
+
+
+
+    </div>
+
+    <div class="footer">
+        <p>Made with <code><3</code> by <a href="https://github.com/jessfraz">@jessfraz</a></p>
+        <p>Checkout the source code at: <a href="https://github.com/genuinetools/reg">github.com/genuinetools/reg</a></p>
+    </div><!--/.footer-->
+    <script src="/static/js/lib/clipboard.min.js"></script>
+    <script src="/static/js/lib/notification.js"></script>
+    <script src="/static/js/lib/prism.js" data-manual></script>
+    <script src="/static/js/scripts.js"></script>
+
+    <script>
+        const clipboard = new ClipboardJS('.copyImageUri');
+        clipboard.on('success', function(e) {
+            console.info('Action:', e.action);
+            console.info('Text:', e.text);
+            console.info('Trigger:', e.trigger);
+
+            Notification("copy success", e.text, "good")
+        });
+
+        clipboard.on('error', function(e) {
+            console.error('Action:', e.action);
+            console.error('Trigger:', e.trigger);
+        });
+
+        document.querySelectorAll('.layer-command-short').forEach( e => {
+            e.addEventListener('click', function(e) {
+                document.querySelector('#command-detail-cmd').value = e.target.innerText
+                let code = e.target.innerText;
+                let html = '';
+
+                if (e.target.dataset.commandLang == 'bash') {
+                    // code = code.replace(/^\/bin\/sh -c/, '');
+                    console.log("bash cmd: [%o]", code)
+                    code = code.replace(/;/g, ' \\'+"\n");
+                    html = Prism.highlight(code, Prism.languages.bash, 'bash');
+                } else {
+                    console.log("docker cmd: [%o]", code)
+                    // code = code.replace(/^\/bin\/sh -c /, '');
+                    // code = code.replace(/^\s?#\(nop\) /, '');
+                    html = Prism.highlight(code, Prism.languages.dockerfile, 'docker');
+                }
+
+                document.querySelector('#command-detail-cmd').innerHTML = html;
+            });
+        });
+    </script>
+
+    <div id="notifications"></div>
+</body>
+</html>
+{{end}}

@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+
+<style>
+    .wrapper {
+        display: flex;
+        flex-flow: row wrap;
+        font-weight: bold;
+        text-align: center;
+        max-width: 1200px;
+        margin: 20px auto;
+    }
+
+    .wrapper > * {
+        padding: 10px;
+    }
+
+    body {
+        padding: 2em;
+    }
+
+    div {
+        border: 1px dashed #de3e04;
+        margin: 5px;
+    }
+
+    .row {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        width: 100%;
+    }
+
+    .column {
+        display: flex;
+        flex-direction: column;
+        flex-basis: 100%;
+        flex: 1;
+    }
+
+</style>
+</head>
+<body>
+
+<div class="wrapper">
+
+    <div class="row" style="background-color: #8c8c8c; width: 100%">
+        <div class="column" >
+            <img src="https://d36jcksde1wxzq.cloudfront.net/54e48877dab8df8f92cd.png" alt="">
+        </div>
+
+        <div class="column" style="text-align: left;">
+            <div class="image-info row">
+                <h3>spritsail/aptly:3</h3>
+                <code>DIGEST:sha256:827c87760e21e27453d6f9bfa766bf9a828af7784d6702413e3e72aa4d8e7067</code>
+                <code>https://hub.docker.com/layers/spritsail/aptly/3/images/sha256-827c87760e21e27453d6f9bfa766bf9a828af7784d6702413e3e72aa4d8e7067?context=explore</code>
+            </div>
+
+
+            <div class="image-detail row">
+                <div class="column">
+                    <div>OS/ARCH</div>
+                    <div>linux/amd64</div>
+                </div>
+                <div class="column">
+                    <div>COMPRESSED SIZE</div>
+                    <div>13.52 MB</div>
+                </div>
+                <div class="column">
+                    <div>LAST PUSHED</div>
+                    <div>2 years ago </div>
+                </div>
+                <div class="column">
+                    <div>TYPE</div>
+                    <div>Image </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row" style="background-color: #5bc0de; width: 100%;">
+        <div class="layer-wrap" style="background-color: #b4b996;margin: 10px;width: 46%; order: 1;">
+            <h3>image layer</h3>
+            <div class="layer" style="text-align: left; background-color: #ba4fe0;">
+                <table>
+                    <tr>
+                        <th>index</th>
+                        <th>command short</th>
+                        <th>size</th>
+                    </tr>
+                    <tr>
+                        <td>1</td>
+                        <td>ADD . /go/src/github.com/smira/aptly</td>
+                        <td>253 B</td>
+                    </tr>
+
+                    <tr>
+                        <td>2</td>
+                        <td>
+                            <div style="display:inline-flex;">
+                                <div style="display: inline-block;overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-all; width: 200px;">
+                                    COPY multi:7d7d4b016ee2e2e18720a1a58004eb4d59de798c619f217398cc1066a656bfd0 in /usr/local/bin/
+                                </div>
+                            </div>
+                        </td>
+                        <td>25 MB</td>
+                    </tr>
+
+                    <tr>
+                        <td>3</td>
+                        <td>
+                            COPY dir:2c88148501e5e48df513668a9195fdbce295a9d9e9b898de8e535b69d66aab04 in /
+                        </td>
+                        <td>31 kB</td>
+                    </tr>
+
+                    <tr>
+                        <td>4</td>
+                        <td>ADD . /xxxxx</td>
+                        <td>20 B</td>
+                    </tr>
+
+                    <tr>
+                        <td>3</td>
+                        <td>
+                            COPY dir:2c88148501e5e48df513668a9195fdbce295a9d9e9b898de8e535b69d66aab04 in /
+                        </td>
+                        <td>31 kB</td>
+                    </tr>
+
+                    <tr>
+                        <td>3</td>
+                        <td>
+                            COPY dir:2c88148501e5e48df513668a9195fdbce295a9d9e9b898de8e535b69d66aab04 in /
+                        </td>
+                        <td>31 kB</td>
+                    </tr>
+
+                    <tr>
+                        <td>3</td>
+                        <td>
+                            COPY dir:2c88148501e5e48df513668a9195fdbce295a9d9e9b898de8e535b69d66aab04 in /
+                        </td>
+                        <td>31 kB</td>
+                    </tr>
+
+                    <tr>
+                        <td>3</td>
+                        <td>
+                            COPY dir:2c88148501e5e48df513668a9195fdbce295a9d9e9b898de8e535b69d66aab04 in /
+                        </td>
+                        <td>31 kB</td>
+                    </tr>
+
+                    <tr>
+                        <td>3</td>
+                        <td>
+                            COPY dir:2c88148501e5e48df513668a9195fdbce295a9d9e9b898de8e535b69d66aab04 in /
+                        </td>
+                        <td>31 kB</td>
+                    </tr>
+
+                    <tr>
+                        <td>3</td>
+                        <td>
+                            COPY dir:2c88148501e5e48df513668a9195fdbce295a9d9e9b898de8e535b69d66aab04 in /
+                        </td>
+                        <td>31 kB</td>
+                    </tr>
+
+                    <tr>
+                        <td>3</td>
+                        <td>
+                            COPY dir:2c88148501e5e48df513668a9195fdbce295a9d9e9b898de8e535b69d66aab04 in /
+                        </td>
+                        <td>31 kB</td>
+                    </tr>
+
+                    <tr>
+                        <td>3</td>
+                        <td>
+                            COPY dir:2c88148501e5e48df513668a9195fdbce295a9d9e9b898de8e535b69d66aab04 in /
+                        </td>
+                        <td>31 kB</td>
+                    </tr>
+
+                    <tr>
+                        <td>3</td>
+                        <td>
+                            COPY dir:2c88148501e5e48df513668a9195fdbce295a9d9e9b898de8e535b69d66aab04 in /
+                        </td>
+                        <td>31 kB</td>
+                    </tr>
+
+                    <tr>
+                        <td>3</td>
+                        <td>
+                            COPY dir:2c88148501e5e48df513668a9195fdbce295a9d9e9b898de8e535b69d66aab04 in /
+                        </td>
+                        <td>31 kB</td>
+                    </tr>
+
+                    <tr>
+                        <td>3</td>
+                        <td>
+                            COPY dir:2c88148501e5e48df513668a9195fdbce295a9d9e9b898de8e535b69d66aab04 in /
+                        </td>
+                        <td>31 kB</td>
+                    </tr>
+
+                    <tr>
+                        <td>3</td>
+                        <td>
+                            COPY dir:2c88148501e5e48df513668a9195fdbce295a9d9e9b898de8e535b69d66aab04 in /
+                        </td>
+                        <td>31 kB</td>
+                    </tr>
+
+                    <tr>
+                        <td>3</td>
+                        <td>
+                            COPY dir:2c88148501e5e48df513668a9195fdbce295a9d9e9b898de8e535b69d66aab04 in /
+                        </td>
+                        <td>31 kB</td>
+                    </tr>
+
+                    <tr>
+                        <td>3</td>
+                        <td>
+                            COPY dir:2c88148501e5e48df513668a9195fdbce295a9d9e9b898de8e535b69d66aab04 in /
+                        </td>
+                        <td>31 kB</td>
+                    </tr>
+
+                    <tr>
+                        <td>3</td>
+                        <td>
+                            COPY dir:2c88148501e5e48df513668a9195fdbce295a9d9e9b898de8e535b69d66aab04 in /
+                        </td>
+                        <td>31 kB</td>
+                    </tr>
+
+                    <tr>
+                        <td>3</td>
+                        <td>
+                            COPY dir:2c88148501e5e48df513668a9195fdbce295a9d9e9b898de8e535b69d66aab04 in /
+                        </td>
+                        <td>31 kB</td>
+                    </tr>
+
+                    <tr>
+                        <td>3</td>
+                        <td>
+                            COPY dir:2c88148501e5e48df513668a9195fdbce295a9d9e9b898de8e535b69d66aab04 in /
+                        </td>
+                        <td>31 kB</td>
+                    </tr>
+
+                    <tr>
+                        <td>3</td>
+                        <td>
+                            COPY dir:2c88148501e5e48df513668a9195fdbce295a9d9e9b898de8e535b69d66aab04 in /
+                        </td>
+                        <td>31 kB</td>
+                    </tr>
+
+                    <tr>
+                        <td>3</td>
+                        <td>
+                            COPY dir:2c88148501e5e48df513668a9195fdbce295a9d9e9b898de8e535b69d66aab04 in /
+                        </td>
+                        <td>31 kB</td>
+                    </tr>
+
+                    <tr>
+                        <td>3</td>
+                        <td>
+                            COPY dir:2c88148501e5e48df513668a9195fdbce295a9d9e9b898de8e535b69d66aab04 in /
+                        </td>
+                        <td>31 kB</td>
+                    </tr>
+
+                    <tr>
+                        <td>3</td>
+                        <td>
+                            COPY dir:2c88148501e5e48df513668a9195fdbce295a9d9e9b898de8e535b69d66aab04 in /
+                        </td>
+                        <td>31 kB</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="code-detail" style="background-color: #b4b996;margin: 10px;
+        width:48%; order: 2; text-align: left;
+        position: sticky; align-self: flex-start; right: 0; top: 0;
+">
+            <h3>image layer</h3>
+
+            <div  style="background-color: #9aaf16; overflow: hidden; white-space: pre-wrap !important;">
+            <pre><code>set -eux \
+ savedAptMark="$(apt-mark showmanual)" \
+ apt-get update \
+ apt-get install -y --no-install-recommends gnupg dirmngr \
+ rm -rf /var/lib/apt/lists/* \
+ mkdir -p /usr/src \
+ cd /usr/src \
+ curl -fsSL -o php.tar.xz "$PHP_URL" \
+ if [ -n "$PHP_SHA256" ] \
+ then echo "$PHP_SHA256 *php.tar.xz" | sha256sum -c - \
+ fi \
+ if [ -n "$PHP_ASC_URL" ] \
+ then curl -fsSL -o php.tar.xz.asc "$PHP_ASC_URL" \
+ export GNUPGHOME="$(mktemp -d)" \
+ for key in $GPG_KEYS \
+ do gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "$key" \
+ done \
+ gpg --batch --verify php.tar.xz.asc php.tar.xz \
+ gpgconf --kill all \
+ rm -rf "$GNUPGHOME" \
+ fi \
+ apt-mark auto '.*' > /dev/null \
+ apt-mark manual $savedAptMark > /dev/null \
+ apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false</code></pre>
+
+        </div>
+        </div>
+        </div>
+
+
+</div>
+
+</body>
+</html>

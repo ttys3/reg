@@ -202,8 +202,8 @@ func (cmd *serverCommand) Run(ctx context.Context, args []string) error {
 	// Static files handler.
 	e.GET("/repo/:repo/tags", rc.tagsHandler)
 	e.GET("/repo/:repo/tags/", rc.tagsHandler)
-	e.GET("/repo/:repo/tag/:tag", rc.vulnerabilitiesHandler)
-	e.GET("/repo/:repo/tag/:tag/", rc.vulnerabilitiesHandler)
+	e.GET("/repo/:repo/tag/:tag", rc.imageLayer)
+	e.GET("/repo/:repo/tag/:tag/", rc.imageLayer)
 
 	// Add the vulns endpoints if we have a client for a clair server.
 	if rc.cl != nil {

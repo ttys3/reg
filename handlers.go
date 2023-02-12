@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/labstack/echo/v4"
+	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
 	"html/template"
 	"io/ioutil"
 	"net/http"
@@ -223,6 +224,133 @@ func (rc *registryController) generateTagsTemplate(ctx context.Context, repo str
 	}
 
 	return buf.Bytes(), nil
+}
+
+type LayerResponse struct {
+	Image  *registry.Image   `json:"image"`
+	Layers []*registry.Layer `json:"layer"`
+}
+
+func (rc *registryController) imageLayer(c echo.Context) error {
+	logrus.WithFields(logrus.Fields{
+		"func":   "layer",
+		"URL":    c.Request().URL,
+		"method": c.Request().Method,
+	}).Info("fetching layer")
+
+	// Parse the query variables.
+	repo, err := url.QueryUnescape(c.Param("repo"))
+	tag := c.Param("tag")
+
+	if err != nil || repo == "" {
+		return c.String(http.StatusNotFound, "Empty repo")
+	}
+
+	if tag == "" {
+		return c.String(http.StatusNotFound, "Empty tag")
+	}
+
+	var result LayerResponse
+	image, err := registry.ParseImage(rc.reg.Domain + "/" + repo + ":" + tag)
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"func":   "vulnerabilities",
+			"URL":    c.Request().URL,
+			"method": c.Request().Method,
+		}).Errorf("parsing image %s:%s failed: %v", repo, tag, err)
+		return c.String(http.StatusInternalServerError, fmt.Sprintf("Parsing image %s:%s failed", repo, tag))
+	}
+	result.Image = &image
+
+	manefest, descriptor, err := rc.reg.Manifest(c.Request().Context(), repo, tag)
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"func":   "vulnerabilities",
+			"URL":    c.Request().URL,
+			"method": c.Request().Method,
+		}).Errorf("getting manifest for %s:%s failed: %v", repo, tag, err)
+		return c.String(http.StatusInternalServerError, fmt.Sprintf("Getting manifest for %s:%s failed", repo, tag))
+	}
+
+	logrus.Infof("manifest: %v, descriptor=%v", manefest, descriptor)
+
+	layers := make([]*registry.Layer, 0, len(manefest.References()))
+
+	for idx, ref := range manefest.References() {
+		// skip the config reference
+		if idx == 0 {
+			continue
+		}
+		layers = append(layers, &registry.Layer{
+			Index:       int64(idx),
+			Digest:      ref.Digest,
+			Size:        ref.Size,
+			Command:     "",
+			CommandLang: "",
+			Created:     nil,
+		})
+	}
+
+	theConfig := ociv1.Image{}
+
+	err = rc.reg.GetConfig(c.Request().Context(), repo, manefest.References()[0].Digest, &theConfig)
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"func":   "layer",
+			"URL":    c.Request().URL,
+			"method": c.Request().Method,
+		}).Errorf("getting config for %s:%s failed: %v", repo, tag, err)
+		return c.String(http.StatusInternalServerError, fmt.Sprintf("Getting config for %s:%s failed", repo, tag))
+	}
+
+	historyLayerIdx := 0
+	for _, layer := range theConfig.History {
+		if layer.EmptyLayer {
+			continue
+		}
+
+		if historyLayerIdx == len(layers) {
+			logrus.Errorf("the number of layers is not equal to the number of history, layers=%d, history=%d non-empty history: %d",
+				len(layers), len(theConfig.History), historyLayerIdx)
+			//break
+		}
+
+		layers[historyLayerIdx].Command = layer.CreatedBy
+		layers[historyLayerIdx].Created = layer.Created
+		// other docker directive: `/bin/sh -c #(nop) `
+		// docker RUN: `/bin/sh -c `
+		// multi stage build
+		// |2 PHP_EXT_BENCODE_VERSION=8.1.0RC6-fpm-bullseye TINI_VERSION=v0.19.0 /bin/sh -c set -eux; curl
+		if strings.HasPrefix(layer.CreatedBy, "/bin/sh -c #(nop) ") {
+			layers[historyLayerIdx].Command = strings.TrimPrefix(layer.CreatedBy, "/bin/sh -c #(nop) ")
+			layers[historyLayerIdx].CommandLang = "docker"
+		} else if strings.HasPrefix(layer.CreatedBy, "/bin/sh -c ") {
+			layers[historyLayerIdx].Command = strings.TrimPrefix(layer.CreatedBy, "/bin/sh -c ")
+			layers[historyLayerIdx].CommandLang = "bash"
+		} else if strings.HasPrefix(layer.CreatedBy, "|") {
+			layers[historyLayerIdx].Command = strings.Replace(layer.CreatedBy, "/bin/sh -c ", "\n", 1)
+			layers[historyLayerIdx].CommandLang = "bash"
+		}
+
+		historyLayerIdx++
+	}
+
+	result.Layers = layers
+
+	if strings.HasSuffix(c.Request().URL.String(), ".json") {
+		return c.JSON(http.StatusOK, result)
+	}
+
+	// Execute the template.
+	if err := rc.tmpl.ExecuteTemplate(c.Response().Writer, "layer", result); err != nil {
+		logrus.WithFields(logrus.Fields{
+			"func":   "layer",
+			"URL":    c.Request().URL,
+			"method": c.Request().Method,
+		}).Errorf("template rendering failed: %v", err)
+		return c.String(http.StatusInternalServerError, fmt.Sprintf("template rendering failed: %v", err))
+	}
+	return nil
 }
 
 func (rc *registryController) vulnerabilitiesHandler(c echo.Context) error {

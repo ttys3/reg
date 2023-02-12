@@ -37,7 +37,9 @@ a:hover {
 .wrapper {
   margin: 0 auto;
   padding-top: 20px;
-  max-width: 800px;
+  max-width: 900px;
+  display: flex;
+  flex-flow: row wrap;
 }
 /*------------------------------------*\
     Demo block
@@ -165,15 +167,7 @@ th {
   font-size: .75em;
   padding-right: 20px;
 }
-/* 2nd Column: Filename */
-th + th {
-  width: 65%;
-}
-/* 3rd Column: Last Modified */
-/* 4th Column: Size */
-th + th + th + th {
-  width: 5%;
-}
+
 tr td:first-of-type {
   padding-left: 10px;
   padding-right: 10px;
@@ -197,7 +191,7 @@ th:last-child {
   padding-right: 5px;
 }
 td a {
-  display: block;
+  display: inline-flex;
 }
 tr.parent a {
   color: #9099A3;
@@ -326,4 +320,64 @@ div.Notification.warning div.ProgressDiv div {
 
 div.Notification.error div.ProgressDiv div {
   background-color: #b30300;
+}
+
+/* layer */
+
+.row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  flex-basis: 100%;
+  flex: 1;
+}
+
+.layer-wrapper {
+  margin: 0 auto;
+  padding-top: 20px;
+  max-width: 1200px;
+  position: relative;
+}
+
+.layer-command-wrapper table {
+  margin: 5px;
+  width: 510px;
+  table-layout: auto;
+}
+
+.layer-command-short {
+  display: inline-block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-all;
+  width: 400px;
+  cursor: pointer;
+}
+
+.command-detail-wrap {
+    margin-left: 20px;
+    width: 700px;
+    position: sticky; align-self: flex-start;
+    top: 10px;
+    right: 10px;
+    padding: 10px;
+}
+
+.command-detail {
+  border: #d1d6d5 1px solid;
+  min-height: 300px;
+  margin-top: 20px;
+}
+
+code[class*="language-"], pre[class*="language-"] {
+  word-break: break-word !important;
+  overflow-wrap: break-word !important;
+  white-space: pre-wrap !important;
 }
