@@ -41,14 +41,21 @@ func (r *Registry) CreatedDate(ctx context.Context, repository string, configDig
 	return configBase.Created, nil
 }
 
-func (r *Registry) TagCreatedDate(ctx context.Context, repo, tag string) (createdDate *time.Time, imageType string, retErr error) {
+func (r *Registry) TagCreatedDate(ctx context.Context, repo, tag string) (createdDate *time.Time, imageType string, imageSize int64, retErr error) {
 	imageType = "Docker v1"
 	manifest, descriptor, err := r.Manifest(ctx, repo, tag)
 	if err != nil {
 		logrus.Errorf("getting v2 or oci manifest for %s:%s failed: %v", repo, tag, err)
 		retErr = err
 		return
-	} else if descriptor.MediaType == ociv1.MediaTypeImageManifest {
+	}
+
+	for _, ref := range manifest.References() {
+		imageSize += ref.Size
+		logrus.Debugf("adding ref %s with size %d, media_type=%s", ref.Digest, ref.Size, ref.MediaType)
+	}
+
+	if descriptor.MediaType == ociv1.MediaTypeImageManifest {
 		if ocimanifest, ok := manifest.(*ocischema.DeserializedManifest); ok && ocimanifest.Annotations != nil {
 			if created, ok := ocimanifest.Annotations["org.opencontainers.image.created"]; ok {
 				if t, err := time.Parse(time.RFC3339, created); err == nil {

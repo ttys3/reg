@@ -19,6 +19,7 @@
             <tr>
                 <th>Name</th>
                 <th>Tag</th>
+                <th>Size</th>
                 <th>Image Type</th>
                 <th>Created</th>
                 {{if .HasVulns}}<th>Vulnerabilities</th>{{end}}
@@ -34,6 +35,9 @@
                     {{if $.HasVulns}}<a href="/repo/{{ $value.Name | urlquery }}/tag/{{ $value.Tag }}/vulns">{{end}}
                     {{ $value.Tag }}
                     {{if $.HasVulns}}</a>{{end}}
+                </td>
+                <td align="right" nowrap>
+                    {{ $value.ImageSize | humanize_bytes }}
                 </td>
                 <td align="right" nowrap>
                     {{ $value.ImageType }}

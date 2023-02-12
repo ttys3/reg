@@ -41,6 +41,7 @@ type Repository struct {
 	Created             *time.Time                `json:"created,omitempty"` // only "Image Manifest Version 2, Schema 1" has this field
 	URI                 string                    `json:"uri"`
 	ImageType           string                    `json:"image_type"`
+	ImageSize           int64                     `json:"image_size"`
 	VulnerabilityReport clair.VulnerabilityReport `json:"vulnerability"`
 }
 
@@ -194,7 +195,7 @@ func (rc *registryController) generateTagsTemplate(ctx context.Context, repo str
 		// get the image creat time, for v2 or oci image,
 		// maybe someday we can get it from `org.opencontainers.image.created` annotation
 		// ref https://github.com/opencontainers/image-spec/blob/main/annotations.md#pre-defined-annotation-keys
-		createdDate, imageType, err := rc.reg.TagCreatedDate(ctx, repo, tag)
+		createdDate, imageType, imageSize, err := rc.reg.TagCreatedDate(ctx, repo, tag)
 		if err != nil {
 			logrus.Warnf("getting created date for %s:%s failed: %v", repo, tag, err)
 		}
@@ -208,6 +209,7 @@ func (rc *registryController) generateTagsTemplate(ctx context.Context, repo str
 			Tag:       tag,
 			URI:       repoURI,
 			ImageType: imageType,
+			ImageSize: imageSize,
 			Created:   createdDate,
 		}
 

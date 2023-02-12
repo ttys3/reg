@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/dustin/go-humanize"
 	"github.com/genuinetools/reg/clair"
 	"github.com/labstack/echo/v4"
 	wordwrap "github.com/mitchellh/go-wordwrap"
@@ -152,6 +153,9 @@ func (cmd *serverCommand) Run(ctx context.Context, args []string) error {
 			default:
 				return "default"
 			}
+		},
+		"humanize_bytes": func(s int64) string {
+			return humanize.Bytes(uint64(s))
 		},
 	}
 
