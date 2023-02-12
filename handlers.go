@@ -222,6 +222,11 @@ func (rc *registryController) generateTagsTemplate(ctx context.Context, repo str
 						descriptor.MediaType, repo, tag)
 					imageType = "Docker V2"
 				}
+				if createdDate == nil {
+					if created, err := rc.reg.CreatedDate(ctx, repo, manifest.References()[0].Digest); err == nil {
+						createdDate = created
+					}
+				}
 			}
 		} else {
 			for _, h := range m1.History {

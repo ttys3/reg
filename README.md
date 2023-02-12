@@ -297,6 +297,9 @@ OCI Image Index Specification https://github.com/opencontainers/image-spec/blob/
 
 Container image formats https://cloud.google.com/container-registry/docs/image-formats
 
+OCI Image Configuration https://github.com/opencontainers/image-spec/blob/main/config.md
+
+
 ### clair api
 
 v2 https://pkg.go.dev/github.com/quay/clair@v2.1.0+incompatible/api/v1

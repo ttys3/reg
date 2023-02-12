@@ -2,6 +2,7 @@ package registry
 
 import (
 	"context"
+	"encoding/json"
 	"io"
 	"net/http"
 	"net/url"
@@ -27,6 +28,22 @@ func (r *Registry) DownloadLayer(ctx context.Context, repository string, digest 
 	}
 
 	return resp.Body, nil
+}
+
+// GetConfig get image config from registry
+// OCI v1.Image https://github.com/opencontainers/image-spec/blob/e7236d53a23a581fabc8e48a0bf3e79acab8912b/specs-go/v1/config.go#LL93C6-L93C11
+// Docker image config: https://github.com/moby/moby/blob/3ba527d82af53cf752aa6ec39daac14626c41b0f/image/image.go#LL92
+func (r *Registry) GetConfig(ctx context.Context, repository string, configDigest digest.Digest, response interface{}) error {
+	body, err := r.DownloadLayer(ctx, repository, configDigest)
+	if err != nil {
+		return err
+	}
+
+	if err := json.NewDecoder(body).Decode(response); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // UploadLayer uploads a specific layer by digest for a repository.
