@@ -2,13 +2,14 @@ package registry
 
 import (
 	"context"
+	"github.com/distribution/distribution/v3/manifest/ocischema"
 	"github.com/genuinetools/reg/repoutils"
+	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
 	"testing"
 	"time"
 )
 
-// test ManifestOCI
-func TestManifestOCI(t *testing.T) {
+func TestManifestOCIDockerhubWithOciAnnotations(t *testing.T) {
 	username := ""
 	password := ""
 
@@ -31,9 +32,28 @@ func TestManifestOCI(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	manifest, err := reg.ManifestOCI(ctx, "library/fedora", "37")
+	manifest, err := reg.ManifestOCI(ctx, "80x86/base-fedora", "37-minimal-amd64")
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Logf("manifest: %+v", manifest)
+
+	imanifest, descriptor, err := reg.Manifest(ctx, "80x86/base-fedora", "37-minimal-amd64")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if descriptor.MediaType == ociv1.MediaTypeImageManifest {
+		ocimanifest, ok := imanifest.(*ocischema.DeserializedManifest)
+		if !ok {
+			t.Fatal("ocimanifest is not ok")
+		}
+		if ocimanifest.Annotations == nil {
+			t.Fatal("annotations is nil")
+		}
+		for k, v := range ocimanifest.Annotations {
+			t.Logf("annotation: %s=%s", k, v)
+		}
+	} else {
+		t.Logf("imanifest: %+v", imanifest)
+	}
 }

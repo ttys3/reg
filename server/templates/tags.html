@@ -19,6 +19,7 @@
             <tr>
                 <th>Name</th>
                 <th>Tag</th>
+                <th>Image Type</th>
                 <th>Created</th>
                 {{if .HasVulns}}<th>Vulnerabilities</th>{{end}}
             </tr>
@@ -35,7 +36,14 @@
                     {{if $.HasVulns}}</a>{{end}}
                 </td>
                 <td align="right" nowrap>
-                    {{ $value.Created.Format "02 Jan, 2006 15:04:05 UTC" }}
+                    {{ $value.ImageType }}
+                </td>
+                <td align="right" nowrap>
+                    {{ if $value.Created }}
+                        {{ $value.Created.Format "02 Jan, 2006 15:04:05 UTC" }}
+                    {{ else }}
+                        n/a
+                    {{ end }}
                 </td>
                 {{if $.HasVulns}}
                 <td align="right" nowrap>

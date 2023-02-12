@@ -6,7 +6,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/distribution/distribution/v3/manifest/ocischema"
 	"github.com/labstack/echo/v4"
+	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
 	"html/template"
 	"io/ioutil"
 	"net/http"
@@ -40,8 +42,9 @@ type v1Compatibility struct {
 type Repository struct {
 	Name                string                    `json:"name"`
 	Tag                 string                    `json:"tag"`
-	Created             time.Time                 `json:"created"`
+	Created             *time.Time                `json:"created,omitempty"` // only "Image Manifest Version 2, Schema 1" has this field
 	URI                 string                    `json:"uri"`
+	ImageType           string                    `json:"image_type"`
 	VulnerabilityReport clair.VulnerabilityReport `json:"vulnerability"`
 }
 
@@ -192,28 +195,45 @@ func (rc *registryController) generateTagsTemplate(ctx context.Context, repo str
 	}
 
 	for _, tag := range tags {
-		// get the manifest
-		// docker V2 pull requests may return V1 manifests unexpectedly resulting in "missing signature key" error
+		// get the image creat time, for v2 or oci image,
+		// maybe someday we can get it from `org.opencontainers.image.created` annotation
+		// ref https://github.com/opencontainers/image-spec/blob/main/annotations.md#pre-defined-annotation-keys
 		m1, err := rc.reg.ManifestV1(ctx, repo, tag)
+		var createdDate *time.Time
+		var imageType string
 		if err != nil {
 			// skip htp error
+			logrus.Warnf("getting v1 manifest for %s:%s failed: %v, try v2 and oci", repo, tag, err)
 			if errors.Is(err, registry.ErrResourceNotFound) {
-				logrus.Infof("skip not exists tag %s:%s", repo, tag)
-				continue
+				manifest, descriptor, err := rc.reg.Manifest(ctx, repo, tag)
+				if err != nil {
+					logrus.Errorf("getting v2 or oci manifest for %s:%s failed: %v", repo, tag, err)
+				} else if descriptor.MediaType == ociv1.MediaTypeImageManifest {
+					if ocimanifest, ok := manifest.(*ocischema.DeserializedManifest); ok && ocimanifest.Annotations != nil {
+						if created, ok := ocimanifest.Annotations["org.opencontainers.image.created"]; ok {
+							if t, err := time.Parse(time.RFC3339, created); err == nil {
+								createdDate = &t
+							}
+						}
+					}
+					imageType = "OCI"
+				} else {
+					logrus.Warnf("can not get created time, unsupported manifest type %s for %s:%s",
+						descriptor.MediaType, repo, tag)
+					imageType = "Docker V2"
+				}
 			}
-			return nil, fmt.Errorf("getting v1 manifest for %s:%s failed: %v", repo, tag, err)
-		}
+		} else {
+			for _, h := range m1.History {
+				var comp v1Compatibility
 
-		var createdDate time.Time
-		for _, h := range m1.History {
-			var comp v1Compatibility
-
-			if err := json.Unmarshal([]byte(h.V1Compatibility), &comp); err != nil {
-				return nil, fmt.Errorf("unmarshal v1 manifest for %s:%s failed: %v", repo, tag, err)
+				if err := json.Unmarshal([]byte(h.V1Compatibility), &comp); err != nil {
+					return nil, fmt.Errorf("unmarshal v1 manifest for %s:%s failed: %v", repo, tag, err)
+				}
+				createdDate = &comp.Created
+				imageType = "Docker V1"
+				break
 			}
-
-			createdDate = comp.Created
-			break
 		}
 
 		repoURI := fmt.Sprintf("%s/%s", rc.reg.Domain, repo)
@@ -221,10 +241,11 @@ func (rc *registryController) generateTagsTemplate(ctx context.Context, repo str
 			repoURI += ":" + tag
 		}
 		rp := Repository{
-			Name:    repo,
-			Tag:     tag,
-			URI:     repoURI,
-			Created: createdDate,
+			Name:      repo,
+			Tag:       tag,
+			URI:       repoURI,
+			ImageType: imageType,
+			Created:   createdDate,
 		}
 
 		result.Repositories = append(result.Repositories, rp)

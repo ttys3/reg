@@ -289,6 +289,14 @@ https://docs.docker.com/registry/introduction/
 
 https://docs.docker.com/registry/deploying/
 
+https://opencontainers.org/posts/blog/2018-10-11-oci-image-support-comes-to-open-source-docker-registry/
+
+OCI Image Manifest Specification https://github.com/opencontainers/image-spec/blob/main/manifest.md
+
+OCI Image Index Specification https://github.com/opencontainers/image-spec/blob/main/image-index.md
+
+Container image formats https://cloud.google.com/container-registry/docs/image-formats
+
 ### clair api
 
 v2 https://pkg.go.dev/github.com/quay/clair@v2.1.0+incompatible/api/v1

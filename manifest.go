@@ -50,7 +50,7 @@ func (cmd *manifestCommand) Run(ctx context.Context, args []string) error {
 		}
 	} else {
 		// Get the v2 manifest.
-		manifest, err = r.Manifest(ctx, image.Path, image.Reference())
+		manifest, _, err = r.Manifest(ctx, image.Path, image.Reference())
 		if err != nil {
 			return err
 		}

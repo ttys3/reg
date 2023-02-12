@@ -5,10 +5,12 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/docker/distribution"
-	"github.com/docker/distribution/manifest/ocischema"
-	"io/ioutil"
+	"github.com/distribution/distribution/v3"
+	"github.com/distribution/distribution/v3/manifest/ocischema"
+	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
+	"io"
 	"net/http"
+	"strings"
 
 	"github.com/distribution/distribution/v3/manifest/manifestlist"
 	"github.com/distribution/distribution/v3/manifest/schema1"
@@ -20,39 +22,64 @@ var (
 	ErrUnexpectedSchemaVersion = errors.New("recieved a different schema version than expected")
 )
 
+// ManifestSupportedSchemeTypes the manifest types supported by the registry
+// ref to the call to distribution.RegisterManifestSchema() in distribution source code
+var ManifestSupportedSchemeTypes = []string{
+	// oci manifest
+	ociv1.MediaTypeImageManifest,
+	// v2 manifest
+	schema2.MediaTypeManifest,
+
+	// v1 manifest
+	schema1.MediaTypeSignedManifest,
+	"application/json",
+	"",
+
+	// manifest list
+	manifestlist.MediaTypeManifestList,
+	// oci manifest list
+	ociv1.MediaTypeImageIndex,
+}
+
 // Manifest returns the manifest for a specific repository:tag.
-func (r *Registry) Manifest(ctx context.Context, repository, ref string) (distribution.Manifest, error) {
+func (r *Registry) Manifest(ctx context.Context, repository, ref string) (distribution.Manifest, distribution.Descriptor, error) {
 	uri := r.url("/v2/%s/manifests/%s", repository, ref)
 	r.Logf("registry.manifests uri=%s repository=%s ref=%s", uri, repository, ref)
 
+	emptyDesc := distribution.Descriptor{}
+
 	req, err := http.NewRequest("GET", uri, nil)
 	if err != nil {
-		return nil, err
+		return nil, emptyDesc, err
 	}
 
-	req.Header.Add("Accept", schema2.MediaTypeManifest)
+	// multi accept header ref https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept#syntax
+	accepts := strings.Join(ManifestSupportedSchemeTypes, ",")
+	req.Header.Add("Accept", accepts)
 
 	resp, err := r.Client.Do(req.WithContext(ctx))
 	if err != nil {
-		return nil, err
+		return nil, emptyDesc, err
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		return nil, emptyDesc, err
 	}
-	r.Logf("registry.manifests resp.Status=%s, body=%s", resp.Status, body)
+	contentType := resp.Header.Get("Content-Type")
+	r.Logf("registry.manifests resp.Status=%s, ContentType=%s, body=%s", resp.Status, contentType, body)
 
-	m, _, err := distribution.UnmarshalManifest(resp.Header.Get("Content-Type"), body)
+	m, d, err := distribution.UnmarshalManifest(contentType, body)
 	if err != nil {
-		return nil, err
+		return nil, emptyDesc, err
 	}
 
-	return m, nil
+	return m, d, nil
 }
 
-// ManifestList gets the registry v2 manifest list.
+// ManifestList gets the registry v2 manifest **list**
+// single arch image does not have a manifest list
 func (r *Registry) ManifestList(ctx context.Context, repository, ref string) (manifestlist.ManifestList, error) {
 	uri := r.url("/v2/%s/manifests/%s", repository, ref)
 	r.Logf("registry.manifests uri=%s repository=%s ref=%s", uri, repository, ref)

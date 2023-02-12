@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/distribution/distribution/v3/manifest/ocischema"
+	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
 	"io"
 	"log"
 	"net/http"
@@ -156,8 +158,8 @@ func (r *Registry) getJSON(ctx context.Context, url string, response interface{}
 	}
 
 	switch response.(type) {
-	//case *ocischema.Manifest:
-	//	req.Header.Add("Accept", imagespecv1.MediaTypeImageManifest)
+	case *ocischema.Manifest:
+		req.Header.Add("Accept", fmt.Sprintf("%s,%s", schema2.MediaTypeManifest, ociv1.MediaTypeImageManifest))
 	case *schema2.Manifest:
 		// https://docs.docker.com/registry/spec/manifest-v2-2/#backward-compatibility
 		// When pulling images, clients indicate support for this new version of the manifest format
@@ -166,9 +168,9 @@ func (r *Registry) getJSON(ctx context.Context, url string, response interface{}
 		// when making a request to the `manifests` endpoint. Updated clients should check
 		// the `Content-Type` header to see whether the manifest returned from the endpoint is in the old format,
 		// or is an image manifest or manifest list in the new format.
-		req.Header.Add("Accept", schema2.MediaTypeManifest)
+		req.Header.Add("Accept", fmt.Sprintf("%s,%s", schema2.MediaTypeManifest, ociv1.MediaTypeImageManifest))
 	case *manifestlist.ManifestList:
-		req.Header.Add("Accept", manifestlist.MediaTypeManifestList)
+		req.Header.Add("Accept", fmt.Sprintf("%s,%s", manifestlist.MediaTypeManifestList, ociv1.MediaTypeImageIndex))
 	}
 
 	resp, err := r.Client.Do(req.WithContext(ctx))
@@ -176,7 +178,7 @@ func (r *Registry) getJSON(ctx context.Context, url string, response interface{}
 		return nil, err
 	}
 	defer resp.Body.Close()
-	r.Logf("registry.registry resp.Status=%s", resp.Status)
+	r.Logf("registry.registry resp.Status=%s content_type=%s", resp.Status, resp.Header.Get("Content-Type"))
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
@@ -184,6 +186,7 @@ func (r *Registry) getJSON(ctx context.Context, url string, response interface{}
 		switch resp.StatusCode {
 		case http.StatusBadRequest:
 			wrapErr = ErrBadRequest
+			// 404: resource not found, body={"errors":[{"code":"MANIFEST_UNKNOWN","message":"OCI manifest found, but accept header does not support OCI manifests"}]}
 		case http.StatusNotFound:
 			wrapErr = ErrResourceNotFound
 		default:
