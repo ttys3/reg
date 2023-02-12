@@ -6,7 +6,9 @@ import (
 	"github.com/distribution/distribution/v3/manifest/schema2"
 	"github.com/opencontainers/go-digest"
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
+	"github.com/peterhellberg/link"
 	"github.com/sirupsen/logrus"
+	"net/url"
 	"time"
 )
 
@@ -16,12 +18,36 @@ type tagsResponse struct {
 
 // Tags returns the tags for a specific repository.
 func (r *Registry) Tags(ctx context.Context, repository string) ([]string, error) {
-	url := r.url("/v2/%s/tags/list", repository)
-	r.Logf("registry.tags url=%s repository=%s", url, repository)
+	return r.tagsWithPagination(ctx, repository, "")
+}
+
+func (r *Registry) tagsWithPagination(ctx context.Context, repository string, u string) ([]string, error) {
+	var uri string
+	if u == "" {
+		r.Logf("registry.tags url=%s repository=%s", u, repository)
+		uri = r.url("/v2/%s/tags/list", repository)
+	} else {
+		uri = r.url(u)
+	}
+
+	r.Logf("registry.tags url=%s repository=%s", uri, repository)
 
 	var response tagsResponse
-	if _, err := r.getJSON(ctx, url, &response); err != nil {
+	h, err := r.getJSON(ctx, uri, &response)
+	if err != nil {
 		return nil, err
+	}
+
+	for _, l := range link.ParseHeader(h) {
+		if l.Rel == "next" {
+			logrus.Infof("begin fetch next page, repo:%s, link: %s", repository, l.URI)
+			unescaped, _ := url.QueryUnescape(l.URI)
+			tags, err := r.tagsWithPagination(ctx, repository, unescaped)
+			if err != nil {
+				return nil, err
+			}
+			response.Tags = append(response.Tags, tags...)
+		}
 	}
 
 	return response.Tags, nil
