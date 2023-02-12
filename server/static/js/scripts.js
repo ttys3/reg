@@ -101,3 +101,19 @@ if (clear_button) {
       search('');
   });
 }
+
+if (window.ClipboardJS) {
+    const clipboard = new ClipboardJS('.copyImageUri');
+    clipboard.on('success', function(e) {
+        console.info('Action:', e.action);
+        console.info('Text:', e.text);
+        console.info('Trigger:', e.trigger);
+
+        Notification("copy success", e.text, "good")
+    });
+
+    clipboard.on('error', function(e) {
+        console.error('Action:', e.action);
+        console.error('Trigger:', e.trigger);
+    });
+}

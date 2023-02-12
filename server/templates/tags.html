@@ -35,7 +35,7 @@
                     {{if $.HasVulns}}<a href="/repo/{{ $value.Name | urlquery }}/tag/{{ $value.Tag }}/vulns">vulns</a>{{end}}
 
                     <a href="/repo/{{ $value.Name | urlquery }}/tag/{{ $value.Tag }}">{{ $value.Tag }}</a>
-                    <code class="copyImageUri" role="button" data-clipboard-text="{{ $value.Name }}:{{ $value.Tag }}">📋</code>
+                    <code class="copyImageUri" title="copy image uri" role="button" data-clipboard-text="{{ $value.Name }}:{{ $value.Tag }}">📋</code>
                 </td>
                 <td align="right" nowrap>
                     {{ $value.ImageSize | humanize_bytes }}
@@ -70,22 +70,6 @@
     <script src="/static/js/lib/clipboard.min.js"></script>
     <script src="/static/js/lib/notification.js"></script>
     <script src="/static/js/scripts.js"></script>
-
-    <script>
-        const clipboard = new ClipboardJS('.copyImageUri');
-        clipboard.on('success', function(e) {
-            console.info('Action:', e.action);
-            console.info('Text:', e.text);
-            console.info('Trigger:', e.trigger);
-
-            Notification("copy success", e.text, "good")
-        });
-
-        clipboard.on('error', function(e) {
-            console.error('Action:', e.action);
-            console.error('Trigger:', e.trigger);
-        });
-    </script>
 
     {{if .HasVulns}}
     <script type="text/javascript">

@@ -33,9 +33,8 @@
                 </td>
 
                 <td align="right" nowrap>
-                    <a href="/repo/{{ $value.Name | urlquery }}/tags">
                     <code>docker pull {{ $value.URI }}</code>
-                    </a>
+                    <code class="copyImageUri" title="copy pull command" role="button" data-clipboard-text="docker pull {{ $value.URI }}">📋</code>
                 </td>
             </tr>
             {{ end }}
@@ -48,7 +47,11 @@
         <p>Last Updated: {{ .LastUpdated }}</p>
         <p>Update Interval:  {{ .UpdateInterval }}</p>
     </div><!--/.footer-->
+    <script src="/static/js/lib/clipboard.min.js"></script>
+    <script src="/static/js/lib/notification.js"></script>
     <script src="/static/js/scripts.js"></script>
+
+    <div id="notifications"></div>
 </body>
 </html>
 {{end}}
