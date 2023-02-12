@@ -13,14 +13,14 @@
     <link rel="stylesheet" href="/static/css/styles.css" />
 </head>
 <body>
-    <h1>{{ .RegistryDomain }}/{{ .Name }}</h1>
+    <h1><a href="/">🏠</a> {{ .RegistryDomain }}/{{ .Name }}</h1>
     <div class="wrapper">
         <table>
             <tr>
                 <th>Name</th>
                 <th>Tag</th>
                 <th>Size</th>
-                <th>Image Type</th>
+                <th>Manifest</th>
                 <th>Created</th>
                 {{if .HasVulns}}<th>Vulnerabilities</th>{{end}}
             </tr>
@@ -34,6 +34,7 @@
                 <td align="right" nowrap>
                     {{if $.HasVulns}}<a href="/repo/{{ $value.Name | urlquery }}/tag/{{ $value.Tag }}/vulns">{{end}}
                     {{ $value.Tag }}
+                    <code class="copyImageUri" role="button" data-clipboard-text="{{ $value.Name }}:{{ $value.Tag }}">📋</code>
                     {{if $.HasVulns}}</a>{{end}}
                 </td>
                 <td align="right" nowrap>
@@ -66,7 +67,26 @@
         <p>Checkout the source code at: <a href="https://github.com/genuinetools/reg">github.com/genuinetools/reg</a></p>
         <p>Last Updated: {{ .LastUpdated }}</p>
     </div><!--/.footer-->
+    <script src="/static/js/lib/clipboard.min.js"></script>
+    <script src="/static/js/lib/notification.js"></script>
     <script src="/static/js/scripts.js"></script>
+
+    <script>
+        const clipboard = new ClipboardJS('.copyImageUri');
+        clipboard.on('success', function(e) {
+            console.info('Action:', e.action);
+            console.info('Text:', e.text);
+            console.info('Trigger:', e.trigger);
+
+            Notification("copy success", e.text, "good")
+        });
+
+        clipboard.on('error', function(e) {
+            console.error('Action:', e.action);
+            console.error('Trigger:', e.trigger);
+        });
+    </script>
+
     {{if .HasVulns}}
     <script type="text/javascript">
       var ajaxCalls = [
@@ -81,6 +101,8 @@
       };
     </script>
     {{end}}
+
+    <div id="notifications"></div>
 </body>
 </html>
 {{end}}

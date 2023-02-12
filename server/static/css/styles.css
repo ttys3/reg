@@ -250,3 +250,80 @@ img {
   border: none;
   max-height: 16px;
 }
+
+/*------------------------------------*\
+    Copy Image URI
+\*------------------------------------ */
+.copyImageUri {
+  cursor: pointer;
+}
+
+#notifications {
+  position: fixed;
+  right: 1em;
+  top: 1em;
+}
+
+div.Notification {
+  display: table;
+  min-width: 250px;
+  box-shadow: 0 0 3px black;
+  border-radius: 3px;
+  margin: 10px 0;
+}
+
+div.Notification div.Content {
+  padding: 3px;
+  margin-left: 20px;
+  margin-right: 10px;
+}
+
+div.Notification h1 {
+  padding: 0;
+  margin: 0;
+  font-size: 1.2em;
+  line-height: 1.4em;
+  font-weight: 400;
+}
+
+div.Notification.good {
+  background-color: #abffcd;
+}
+
+div.Notification.warning {
+  background-color: #ffc693;
+}
+
+div.Notification.error {
+  background-color: #ff9593;
+}
+
+div.Notification div.ProgressDiv div {
+  height: 3px;
+  width: 0%;
+  box-shadow: 0 0 1px black;
+}
+
+div.Notification.good div.Content {
+  color: #009e0a;
+}
+
+div.Notification.warning div.Content {
+  color: #c55c00;
+}
+
+div.Notification.error div.Content {
+  color: #b30300;
+}
+
+div.Notification.good div.ProgressDiv div {
+  background-color: #009e0a;
+}
+
+div.Notification.warning div.ProgressDiv div {
+  background-color: #c55c00;
+}
+
+div.Notification.error div.ProgressDiv div {
+  background-color: #b30300;
+}
