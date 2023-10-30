@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/distribution/distribution/v3 v3.0.0-20230131081513-cf87e8d07e8d
 	github.com/docker/cli v23.0.1+incompatible
-	github.com/docker/docker v23.0.1+incompatible
+	github.com/docker/docker v24.0.7+incompatible
 	github.com/dustin/go-humanize v1.0.1
 	github.com/genuinetools/pkg v0.0.0-20181022210355-2fcf164d37cb
 	github.com/google/go-cmp v0.5.9
