@@ -8,6 +8,36 @@
 
 Docker registry v2 command line client and repo listing generator with security checks.
 
+------------------------------------
+
+## server quick start
+
+```shell
+reg server --auth-url https://hub.example.com --timeout 5s -u USERNAME -p PASSWORD
+```
+------------------------------------
+
+## screenshots
+
+**image list**
+
+![image list](https://user-images.githubusercontent.com/41882455/283872798-7a0d7fc7-0f3b-4414-865f-47d238987c08.png)
+
+------------------------------------
+
+**tags list**
+
+![tags list](https://user-images.githubusercontent.com/41882455/283873563-eff517e7-4be4-483f-ae9f-b3a47119ca04.png)
+
+------------------------------------
+
+**support show image layers like dockerhub**
+
+![image layers](https://user-images.githubusercontent.com/41882455/283871192-1706f1df-9e6e-47ed-979f-4067cf6da5ca.png)
+
+------------------------------------
+
+
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
