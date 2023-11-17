@@ -1,10 +1,10 @@
 # reg
 
-[![make-all](https://github.com/genuinetools/reg/workflows/make%20all/badge.svg)](https://github.com/genuinetools/reg/actions?query=workflow%3A%22make+all%22)
-[![make-image](https://github.com/genuinetools/reg/workflows/make%20image/badge.svg)](https://github.com/genuinetools/reg/actions?query=workflow%3A%22make+image%22)
-[![make-test](https://github.com/genuinetools/reg/workflows/make%20test/badge.svg)](https://github.com/genuinetools/reg/actions?query=workflow%3A%22make+test%22)
-[![GoDoc](https://img.shields.io/badge/godoc-reference-5272B4.svg?style=for-the-badge)](https://godoc.org/github.com/genuinetools/reg)
-[![Github All Releases](https://img.shields.io/github/downloads/genuinetools/reg/total.svg?style=for-the-badge)](https://github.com/genuinetools/reg/releases)
+[![make-all](https://github.com/ttys3/reg/workflows/make%20all/badge.svg)](https://github.com/ttys3/reg/actions?query=workflow%3A%22make+all%22)
+[![make-image](https://github.com/ttys3/reg/workflows/make%20image/badge.svg)](https://github.com/ttys3/reg/actions?query=workflow%3A%22make+image%22)
+[![make-test](https://github.com/ttys3/reg/workflows/make%20test/badge.svg)](https://github.com/ttys3/reg/actions?query=workflow%3A%22make+test%22)
+[![GoDoc](https://img.shields.io/badge/godoc-reference-5272B4.svg?style=for-the-badge)](https://godoc.org/github.com/ttys3/reg)
+[![Github All Releases](https://img.shields.io/github/downloads/ttys3/reg/total.svg?style=for-the-badge)](https://github.com/ttys3/reg/releases)
 
 Docker registry v2 command line client and repo listing generator with security checks.
 
@@ -33,12 +33,12 @@ Docker registry v2 command line client and repo listing generator with security 
 
 #### Binaries
 
-For installation instructions from binaries please visit the [Releases Page](https://github.com/genuinetools/reg/releases).
+For installation instructions from binaries please visit the [Releases Page](https://github.com/ttys3/reg/releases).
 
 #### Via Go
 
 ```console
-$ go get github.com/genuinetools/reg
+$ go get github.com/ttys3/reg
 ```
 
 ## Usage
