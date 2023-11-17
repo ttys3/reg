@@ -13,7 +13,6 @@ import (
 	"strings"
 
 	"github.com/distribution/distribution/v3/manifest/manifestlist"
-	"github.com/distribution/distribution/v3/manifest/schema1"
 	"github.com/distribution/distribution/v3/manifest/schema2"
 )
 
@@ -30,8 +29,6 @@ var ManifestSupportedSchemeTypes = []string{
 	// v2 manifest
 	schema2.MediaTypeManifest,
 
-	// v1 manifest
-	schema1.MediaTypeSignedManifest,
 	"application/json",
 	"",
 
@@ -126,27 +123,6 @@ func (r *Registry) ManifestV2(ctx context.Context, repository, ref string) (sche
 	}
 
 	if m.Versioned.SchemaVersion != schema2.SchemaVersion.SchemaVersion {
-		return m, ErrUnexpectedSchemaVersion
-	}
-
-	return m, nil
-}
-
-// ManifestV1 gets the registry v1 manifest.
-// v1 means "Schema 1", Image Manifest Version 2, Schema 1
-// https://docs.docker.com/registry/spec/manifest-v2-1/#manifest-field-descriptions
-func (r *Registry) ManifestV1(ctx context.Context, repository, ref string) (schema1.SignedManifest, error) {
-	uri := r.url("/v2/%s/manifests/%s", repository, ref)
-	r.Logf("registry.manifests uri=%s repository=%s ref=%s", uri, repository, ref)
-
-	var m schema1.SignedManifest
-	if _, err := r.getJSON(ctx, uri, &m); err != nil {
-		payload, _, _ := m.Payload()
-		r.Logf("registry.manifests v1 response, Manifest=%v Canonical=%s Payload=%s", m.Manifest, m.Canonical, payload)
-		return m, err
-	}
-
-	if m.Versioned.SchemaVersion != 1 {
 		return m, ErrUnexpectedSchemaVersion
 	}
 

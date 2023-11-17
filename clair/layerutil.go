@@ -77,17 +77,17 @@ func (c *Clair) getLayers(ctx context.Context, r *registry.Registry, repo, tag s
 		return filteredLayers, mf.Config.Digest.String(), nil
 	}
 
-	m, err := r.ManifestV1(ctx, repo, tag)
+	m, err := r.ManifestOCI(ctx, repo, tag)
 	if err != nil {
 		return nil, "", fmt.Errorf("getting the v1 manifest for %s:%s failed: %v", repo, tag, err)
 	}
 
-	for i := 0; i < len(m.FSLayers); i++ {
-		if filterEmpty && IsEmptyLayer(m.FSLayers[i].BlobSum) {
+	for i := 0; i < len(m.Layers); i++ {
+		if filterEmpty && IsEmptyLayer(m.Layers[i].Digest) {
 			continue
 		} else {
 			filteredLayers[i] = distribution.Descriptor{
-				Digest: m.FSLayers[i].BlobSum,
+				Digest: m.Layers[i].Digest,
 			}
 		}
 	}

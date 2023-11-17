@@ -18,11 +18,11 @@ func (cmd *manifestCommand) LongHelp() string  { return manifestHelp }
 func (cmd *manifestCommand) Hidden() bool      { return false }
 
 func (cmd *manifestCommand) Register(fs *flag.FlagSet) {
-	fs.BoolVar(&cmd.v1, "v1", false, "force the version of the manifest retrieved to v1")
+	fs.BoolVar(&cmd.oci, "oci", false, "force the version of the manifest retrieved to oci (default is v2)")
 }
 
 type manifestCommand struct {
-	v1 bool
+	oci bool
 }
 
 func (cmd *manifestCommand) Run(ctx context.Context, args []string) error {
@@ -42,9 +42,9 @@ func (cmd *manifestCommand) Run(ctx context.Context, args []string) error {
 	}
 
 	var manifest interface{}
-	if cmd.v1 {
-		// Get the v1 manifest if it was explicitly asked for.
-		manifest, err = r.ManifestV1(ctx, image.Path, image.Reference())
+	if cmd.oci {
+		// Get the oci manifest if it was explicitly asked for.
+		manifest, err = r.ManifestOCI(ctx, image.Path, image.Reference())
 		if err != nil {
 			return err
 		}

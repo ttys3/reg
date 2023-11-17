@@ -30,11 +30,6 @@ type registryController struct {
 	generateOnly bool
 }
 
-type v1Compatibility struct {
-	ID      string    `json:"id"`
-	Created time.Time `json:"created"`
-}
-
 // A Repository holds data after a vulnerability scan of a single repo
 type Repository struct {
 	Name                string                    `json:"name"`

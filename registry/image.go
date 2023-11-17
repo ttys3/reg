@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/distribution/distribution/v3/reference"
+	"github.com/distribution/reference"
 	digest "github.com/opencontainers/go-digest"
 )
 

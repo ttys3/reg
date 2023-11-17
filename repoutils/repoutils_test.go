@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/distribution/distribution/v3/reference"
+	"github.com/distribution/reference"
 	"github.com/docker/cli/cli/config"
 	"github.com/docker/docker/api/types"
 	"github.com/google/go-cmp/cmp"
