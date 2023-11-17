@@ -14,10 +14,10 @@ import (
 	"time"
 
 	"github.com/dustin/go-humanize"
-	"github.com/genuinetools/reg/clair"
 	"github.com/labstack/echo/v4"
 	wordwrap "github.com/mitchellh/go-wordwrap"
 	"github.com/sirupsen/logrus"
+	"github.com/ttys3/reg/clair"
 )
 
 const serverHelp = `Run a static UI server for a registry.`

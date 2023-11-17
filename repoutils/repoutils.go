@@ -80,7 +80,7 @@ func GetAuthConfig(username, password, registry string) (types.AuthConfig, error
 		}
 
 		// add https:// to user input and try again
-		// see https://github.com/genuinetools/reg/issues/32
+		// see https://github.com/ttys3/reg/issues/32
 		if !strings.HasPrefix(registry, "https://") && !strings.HasPrefix(registry, "http://") {
 			registryCleaned := "https://" + registry
 			if creds, ok := authConfigs[registryCleaned]; ok {

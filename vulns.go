@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/genuinetools/reg/clair"
-	"github.com/genuinetools/reg/registry"
 	"github.com/sirupsen/logrus"
+	"github.com/ttys3/reg/clair"
+	"github.com/ttys3/reg/registry"
 )
 
 const vulnsHelp = `Get a vulnerability report for a repository from a CoreOS Clair server.`

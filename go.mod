@@ -1,4 +1,4 @@
-module github.com/genuinetools/reg
+module github.com/ttys3/reg
 
 go 1.21
 

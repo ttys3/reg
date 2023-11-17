@@ -18,7 +18,7 @@ dind: stop-dind ## Starts a docker-in-docker container for running the tests wit
 		--name $(NAME)-dind \
 		--privileged \
 		-v $(CURDIR)/.certs:/etc/docker/ssl \
-		-v $(CURDIR):/go/src/github.com/genuinetools/reg \
+		-v $(CURDIR):/go/src/github.com/ttys3/reg \
 		-v /tmp:/tmp \
 		$(REGISTRY)/docker:userns \
 		dockerd -D --storage-driver $(DOCKER_GRAPHDRIVER) \
@@ -38,8 +38,8 @@ stop-dind: ## Stops the docker-in-docker container.
 .PHONY: dtest
 dtest: image-dev ## Run the tests in a docker container.
 	docker run --rm -i $(DOCKER_FLAGS) \
-		-v $(CURDIR):/go/src/github.com/genuinetools/reg \
-		--workdir /go/src/github.com/genuinetools/reg \
+		-v $(CURDIR):/go/src/github.com/ttys3/reg \
+		--workdir /go/src/github.com/ttys3/reg \
 		-v $(CURDIR)/.certs:/etc/docker/ssl:ro \
 		-v /tmp:/tmp \
 		--disable-content-trust=true \

@@ -8,7 +8,7 @@ RUN	apk add --no-cache \
 	bash \
 	ca-certificates
 
-COPY . /go/src/github.com/genuinetools/reg
+COPY . /go/src/github.com/ttys3/reg
 
 RUN set -x \
 	&& apk add --no-cache --virtual .build-deps \
@@ -17,7 +17,7 @@ RUN set -x \
 		libc-dev \
 		libgcc \
 		make \
-	&& cd /go/src/github.com/genuinetools/reg \
+	&& cd /go/src/github.com/ttys3/reg \
 	&& make static \
 	&& mv reg /usr/bin/reg \
 	&& apk del .build-deps \

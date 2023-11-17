@@ -3,8 +3,8 @@ package registry
 import (
 	"context"
 	"github.com/distribution/distribution/v3/manifest/ocischema"
-	"github.com/genuinetools/reg/repoutils"
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
+	"github.com/ttys3/reg/repoutils"
 	"testing"
 	"time"
 )

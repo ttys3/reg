@@ -16,9 +16,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/genuinetools/reg/clair"
-	"github.com/genuinetools/reg/registry"
 	"github.com/sirupsen/logrus"
+	"github.com/ttys3/reg/clair"
+	"github.com/ttys3/reg/registry"
 )
 
 type registryController struct {

@@ -6,7 +6,7 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/genuinetools/reg/registry"
+	"github.com/ttys3/reg/registry"
 )
 
 const manifestHelp = `Get the json manifest for a repository.`

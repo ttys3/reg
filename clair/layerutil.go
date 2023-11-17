@@ -3,7 +3,7 @@ package clair
 import (
 	"context"
 	"fmt"
-	"github.com/genuinetools/reg/registry"
+	"github.com/ttys3/reg/registry"
 	"strings"
 
 	"github.com/distribution/distribution/v3"

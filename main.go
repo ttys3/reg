@@ -11,10 +11,10 @@ import (
 	"time"
 
 	"github.com/genuinetools/pkg/cli"
-	"github.com/genuinetools/reg/registry"
-	"github.com/genuinetools/reg/repoutils"
-	"github.com/genuinetools/reg/version"
 	"github.com/sirupsen/logrus"
+	"github.com/ttys3/reg/registry"
+	"github.com/ttys3/reg/repoutils"
+	"github.com/ttys3/reg/version"
 )
 
 var (

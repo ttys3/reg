@@ -31,7 +31,7 @@ func TestManifestV1(t *testing.T) {
 }
 
 func TestManifestWithHubDomain(t *testing.T) {
-	// Regression test for https://github.com/genuinetools/reg/issues/164
+	// Regression test for https://github.com/ttys3/reg/issues/164
 	out, err := run("manifest", "busybox")
 	if err != nil {
 		t.Fatalf("output: %s, error: %v", out, err)
